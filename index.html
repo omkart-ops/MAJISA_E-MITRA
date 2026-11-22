@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="hi">
+  <head>
+    <!-- Viewport configuration for responsive layout across mobile, tablet, and desktop -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MAJISA E-MITRA | माजीसा ई-मित्र — Customer &amp; Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Inter"', '"Noto Sans Devanagari"', 'system-ui', 'sans-serif'],
+              hindi: ['"Noto Sans Devanagari"', '"Inter"', 'sans-serif']
+            },
+            colors: {
+              civic: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                600: '#1d4ed8',
+                700: '#1e40af',
+                800: '#1e3a8a',
+                900: '#0f294a'
+              },
+              saffron: {
+                500: '#ea580c',
+                600: '#c2410c'
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', 'Noto Sans Devanagari', system-ui, sans-serif;
+      }
+      .slip-colored-banner {
+        background: linear-gradient(135deg, #0f294a 0%, #1e40af 58%, #c2410c 100%);
+        color: #ffffff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: #ffffff !important;
+          color: #0f172a !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        main {
+          padding: 0 !important;
+          max-width: 100% !important;
+        }
+        #customer-portal,
+        #customer-portal > .grid,
+        #customer-portal > .grid > .lg\:col-span-5,
+        #customer-receipt-card {
+          display: block !important;
+          width: 100% !important;
+          margin: 0 !important;
+        }
+        #customer-receipt-card {
+          box-shadow: none !important;
+          border: 2px solid #0f294a !important;
+          border-radius: 14px !important;
+          padding: 20px !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        #customer-receipt-card * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col selection:bg-civic-600 selection:text-white">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-3 sm:px-0 pointer-events-none no-print"></div>
+
+    <!-- Top Bilingual Header & Mode Switcher -->
+    <header class="bg-civic-900 text-white shadow-lg border-b border-civic-800 sticky top-0 z-40 no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-amber-400 to-saffron-600 flex items-center justify-center font-extrabold text-lg text-slate-950 shadow-md shrink-0">
+            M
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight leading-none">
+                MAJISA E-MITRA <span class="text-amber-300">| माजीसा ई-मित्र</span>
+              </h1>
+              <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                Citizen • Tax • Exam • CSC
+              </span>
+            </div>
+            <p class="text-xs text-blue-100/90 mt-1">
+              नागरिक, आयकर, विश्वविद्यालय, विद्यालय व डिजिटल सेवा केंद्र • Bilingual Citizen &amp; Admin Portal
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between md:justify-end gap-2">
+          <!-- Display Mode Selector (Bilingual / Hindi / English) -->
+          <div class="inline-flex rounded-xl bg-civic-800/90 p-1 border border-white/10 text-xs font-semibold" role="group" aria-label="Language Display Mode">
+            <button
+              type="button"
+              id="lang-btn-bilingual"
+              onclick="setDisplayMode('bilingual')"
+              class="px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold transition cursor-pointer"
+            >
+              हिन्दी + EN
+            </button>
+            <button
+              type="button"
+              id="lang-btn-hi"
+              onclick="setDisplayMode('hi')"
+              class="px-2.5 py-1.5 rounded-lg text-blue-100 hover:text-white transition cursor-pointer"
+            >
+              हिन्दी
+            </button>
+            <button
+              type="button"
+              id="lang-btn-en"
+              onclick="setDisplayMode('en')"
+              class="px-2.5 py-1.5 rounded-lg text-blue-100 hover:text-white transition cursor-pointer"
+            >
+              English
+            </button>
+          </div>
+
+          <!-- Portal Switcher -->
+          <nav class="inline-flex rounded-xl bg-slate-950/50 p-1 border border-white/15" aria-label="Portal Navigation">
+            <button
+              type="button"
+              id="nav-customer-btn"
+              onclick="switchPortal('customer')"
+              class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-civic-900 shadow-xs transition cursor-pointer"
+            >
+              <span class="hi-text">ग्राहक पेज</span><span class="lang-sep"> / </span><span class="en-text">Customer Page</span>
+            </button>
+            <button
+              type="button"
+              id="nav-admin-btn"
+              onclick="switchPortal('admin')"
+              class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-blue-100 hover:text-white transition cursor-pointer flex items-center gap-1.5"
+            >
+              <span>🔐</span>
+              <span><span class="hi-text">एडमिन पेज</span><span class="lang-sep"> / </span><span class="en-text">Admin Page</span></span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <!-- ==================== CUSTOMER PORTAL ==================== -->
+      <section id="customer-portal" class="space-y-6">
+        <!-- Hero Banner -->
+        <div class="bg-gradient-to-r from-civic-900 via-civic-800 to-civic-700 rounded-2xl p-5 sm:p-7 text-white shadow-md flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div class="space-y-1.5 max-w-2xl">
+            <span class="inline-block text-xs font-bold bg-amber-400 text-slate-950 px-3 py-1 rounded-full">
+              <span class="hi-text">माजीसा ई-मित्र डिजिटल सेवा पोर्टल</span><span class="lang-sep"> • </span><span class="en-text">Majisa E-Mitra Digital Service Desk</span>
+            </span>
+            <h2 class="text-xl sm:text-2xl font-extrabold leading-snug">
+              <span class="hi-text">त्वरित आवेदन, विवरण सत्यापन के बाद ऑटो QR भुगतान व रसीद</span>
+              <span class="lang-sep"> — </span>
+              <span class="en-text">Fast Applications, Detail-Gated Auto QR Payment &amp; Instant Slip</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-blue-100/95">
+              PAN, ITR, RTE Admission, NEET (UG), JNVU Exam, Ration Migration, Gazette Name Change, CSC &amp; Citizen Certificates — plus instant Acknowledgment Slip print, colored PDF download &amp; WhatsApp (<span class="font-mono">9784018715</span>).
+            </p>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-4 min-w-[240px] shrink-0">
+            <div class="text-xs text-blue-100">
+              <span class="hi-text">चयनित सेवा शुल्क</span><span class="lang-sep"> / </span><span class="en-text">Selected Service Fee</span>
+            </div>
+            <div id="hero-selected-fee" class="text-2xl sm:text-3xl font-extrabold text-amber-300 mt-0.5">₹110</div>
+            <div id="hero-selected-service" class="text-xs font-medium text-white/90 mt-1 truncate">
+              PAN Card (UTIITSL / Protean)
+            </div>
+            <div class="text-[11px] text-emerald-200 mt-1.5 font-mono">
+              WhatsApp Desk: <span id="hero-wa-number">9784018715</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <!-- Left Column: Service Selection, Documents Checklist & Application Form (7 cols) -->
+          <div class="lg:col-span-7 space-y-6">
+            <!-- Step 1: Service Catalog with Search & Category Filters -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-saffron-600">
+                    <span class="hi-text">चरण 1</span><span class="lang-sep"> • </span><span class="en-text">Step 1</span>
+                  </span>
+                  <h3 class="text-lg font-bold text-slate-900">
+                    <span class="hi-text">सेवा चुनें</span><span class="lang-sep"> / </span><span class="en-text">Select a Service</span>
+                  </h3>
+                </div>
+                <div class="relative w-full sm:w-64">
+                  <input
+                    id="service-search-input"
+                    type="search"
+                    oninput="renderServiceCards()"
+                    placeholder="Search सेवा / Service..."
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 pl-9 pr-3 py-2 text-xs sm:text-sm outline-none transition"
+                  />
+                  <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+                </div>
+              </div>
+
+              <!-- Category Filter Pills -->
+              <div id="category-filter-bar" class="flex flex-wrap gap-1.5 mb-4"></div>
+
+              <!-- Service Cards Grid -->
+              <div id="service-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[430px] overflow-y-auto pr-1"></div>
+
+              <!-- Required Documents Checklist for Selected Service -->
+              <div id="service-docs-box" class="mt-4 rounded-xl bg-civic-50/80 border border-civic-100 p-3.5">
+                <div class="text-xs font-bold text-civic-900 flex items-center gap-1.5 mb-1.5">
+                  <span>📎</span>
+                  <span>
+                    <span class="hi-text">आवश्यक दस्तावेज़</span><span class="lang-sep"> / </span><span class="en-text">Required Documents</span>:
+                  </span>
+                  <span id="docs-service-title" class="text-civic-700 font-extrabold"></span>
+                </div>
+                <ul id="service-docs-list" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-700 list-disc list-inside"></ul>
+              </div>
+            </div>
+
+            <!-- Step 2: Customer Details & Payment Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+              <div class="mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-saffron-600">
+                  <span class="hi-text">चरण 2</span><span class="lang-sep"> • </span><span class="en-text">Step 2</span>
+                </span>
+                <h3 class="text-lg font-bold text-slate-900">
+                  <span class="hi-text">ग्राहक विवरण व भुगतान</span><span class="lang-sep"> / </span><span class="en-text">Customer Details &amp; Payment</span>
+                </h3>
+              </div>
+
+              <form id="customer-application-form" onsubmit="handleCustomerSubmit(event)" class="space-y-4">
+                <div>
+                  <label for="customer-service-select" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                    <span class="hi-text">चयनित सेवा</span><span class="lang-sep"> / </span><span class="en-text">Selected Service</span> *
+                  </label>
+                  <select
+                    id="customer-service-select"
+                    onchange="selectService(this.value)"
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm font-medium outline-none transition"
+                  ></select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label for="customer-name" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                      <span class="hi-text">पूरा नाम</span><span class="lang-sep"> / </span><span class="en-text">Full Name</span> *
+                    </label>
+                    <input
+                      id="customer-name"
+                      type="text"
+                      required
+                      oninput="onCustomerGateFieldChange()"
+                      placeholder="e.g. Vikram Singh / विक्रम सिंह"
+                      class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm outline-none transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label for="customer-mobile" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                      <span class="hi-text">मोबाइल नंबर (10 अंक)</span><span class="lang-sep"> / </span><span class="en-text">Mobile Number (10 Digits)</span> *
+                    </label>
+                    <input
+                      id="customer-mobile"
+                      type="tel"
+                      required
+                      pattern="[0-9]{10}"
+                      maxlength="10"
+                      oninput="onCustomerGateFieldChange()"
+                      placeholder="98XXXXXXXX"
+                      class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label for="customer-id-doc" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                    <span class="hi-text">आधार / आवेदन संदर्भ / आईडी विवरण</span><span class="lang-sep"> / </span><span class="en-text">Aadhaar / ID / Application Reference</span> *
+                  </label>
+                  <input
+                    id="customer-id-doc"
+                    type="text"
+                    required
+                    oninput="onCustomerGateFieldChange()"
+                    placeholder="e.g. Aadhaar / Roll No. / Application Ref"
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label for="customer-notes" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">
+                    <span class="hi-text">पता / अतिरिक्त टिप्पणी (वैकल्पिक)</span><span class="lang-sep"> / </span><span class="en-text">Address / Additional Notes (Optional)</span>
+                  </label>
+                  <textarea
+                    id="customer-notes"
+                    rows="2"
+                    placeholder="Village/Ward, district, father/husband name, or special instructions..."
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2 text-sm outline-none transition"
+                  ></textarea>
+                </div>
+
+                <!-- Payment Method Selector -->
+                <div class="pt-2 border-t border-slate-100">
+                  <label class="block text-xs sm:text-sm font-bold text-slate-800 mb-2">
+                    <span class="hi-text">भुगतान का माध्यम चुनें</span><span class="lang-sep"> / </span><span class="en-text">Choose Payment Method</span> *
+                  </label>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <label class="cursor-pointer">
+                      <input type="radio" name="paymentMethod" value="Auto QR Code" checked onchange="onPaymentMethodChange()" class="peer sr-only" />
+                      <div class="rounded-xl border-2 border-slate-200 peer-checked:border-civic-700 peer-checked:bg-civic-50 p-2.5 text-center transition">
+                        <div class="text-base">📱</div>
+                        <div class="text-xs font-bold text-slate-800 mt-0.5">Auto QR</div>
+                        <div class="text-[11px] text-slate-500">ऑटो क्यूआर</div>
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="paymentMethod" value="UPI ID / App" onchange="onPaymentMethodChange()" class="peer sr-only" />
+                      <div class="rounded-xl border-2 border-slate-200 peer-checked:border-civic-700 peer-checked:bg-civic-50 p-2.5 text-center transition">
+                        <div class="text-base">⚡</div>
+                        <div class="text-xs font-bold text-slate-800 mt-0.5">UPI / App</div>
+                        <div class="text-[11px] text-slate-500">यूपीआई ऐप</div>
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="paymentMethod" value="Debit / Credit Card" onchange="onPaymentMethodChange()" class="peer sr-only" />
+                      <div class="rounded-xl border-2 border-slate-200 peer-checked:border-civic-700 peer-checked:bg-civic-50 p-2.5 text-center transition">
+                        <div class="text-base">💳</div>
+                        <div class="text-xs font-bold text-slate-800 mt-0.5">Card</div>
+                        <div class="text-[11px] text-slate-500">कार्ड भुगतान</div>
+                      </div>
+                    </label>
+                    <label class="cursor-pointer">
+                      <input type="radio" name="paymentMethod" value="Counter / Cash" onchange="onPaymentMethodChange()" class="peer sr-only" />
+                      <div class="rounded-xl border-2 border-slate-200 peer-checked:border-civic-700 peer-checked:bg-civic-50 p-2.5 text-center transition">
+                        <div class="text-base">💵</div>
+                        <div class="text-xs font-bold text-slate-800 mt-0.5">Cash</div>
+                        <div class="text-[11px] text-slate-500">काउंटर नकद</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Dynamic Payment Box (Detail-Gated Auto QR Code & Alternative Modes) -->
+                <div id="payment-details-box" class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3"></div>
+
+                <!-- UTR / Transaction Reference Input -->
+                <div>
+                  <label for="customer-utr-ref" class="block text-xs font-semibold text-slate-700 mb-1">
+                    <span class="hi-text">UTR / भुगतान संदर्भ नंबर (यदि भुगतान किया है)</span><span class="lang-sep"> / </span><span class="en-text">UTR / Payment Reference (Optional if paying at counter)</span>
+                  </label>
+                  <input
+                    id="customer-utr-ref"
+                    type="text"
+                    placeholder="e.g. UTR 425819003412 or CASH-COUNTER"
+                    class="w-full rounded-xl border border-slate-300 bg-white focus:border-civic-600 px-3.5 py-2 text-sm font-mono outline-none transition"
+                  />
+                </div>
+
+                <!-- Total & Submit Button -->
+                <div class="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-slate-100">
+                  <div>
+                    <div class="text-xs text-slate-500">
+                      <span class="hi-text">कुल देय शुल्क</span><span class="lang-sep"> / </span><span class="en-text">Total Payable Fee</span>
+                    </div>
+                    <div id="form-payable-amount" class="text-2xl font-extrabold text-civic-900">₹110</div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full sm:w-auto px-6 py-3 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-white font-bold text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>✅</span>
+                    <span>
+                      <span class="hi-text">भुगतान दर्ज करें व रसीद बनाएं</span><span class="lang-sep"> / </span><span class="en-text">Submit &amp; Generate Slip</span>
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Right Column: Acknowledgment Slip & Live Status Tracker (5 cols) -->
+          <div class="lg:col-span-5 space-y-6">
+            <div id="customer-receipt-card" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+              <div class="slip-colored-banner rounded-xl p-4 mb-4 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+                <div>
+                  <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                    <span class="hi-text">आवेदन पावती रसीद</span><span class="lang-sep"> / </span><span class="en-text">Acknowledgment Slip</span>
+                  </span>
+                  <h3 class="text-base sm:text-lg font-extrabold text-white mt-1.5 leading-tight">
+                    MAJISA E-MITRA <span class="text-amber-300">| माजीसा ई-मित्र</span>
+                  </h3>
+                  <div class="text-[11px] text-blue-100 font-mono mt-0.5" id="slip-wa-badge">WhatsApp Desk: 9784018715</div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                  <button
+                    type="button"
+                    onclick="downloadReceiptPdf()"
+                    class="text-xs font-bold px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 transition flex items-center gap-1 shadow-xs cursor-pointer"
+                  >
+                    <span>📄</span>
+                    <span>Download PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="printAcknowledgmentSlip()"
+                    class="text-xs font-bold px-3 py-2 rounded-xl bg-white hover:bg-blue-50 text-civic-900 transition flex items-center gap-1 shadow-xs cursor-pointer"
+                  >
+                    <span>🖨️</span>
+                    <span>Print Slip</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="receipt-content" class="text-sm text-slate-600 space-y-2.5">
+                <p class="text-slate-500 text-xs sm:text-sm">
+                  <span class="hi-text">आवेदन व भुगतान दर्ज करने के बाद यहाँ पावती रसीद, प्रिंट/डाउनलोड विकल्प और व्हाट्सएप संदेश बटन दिखेंगे।</span>
+                  <span class="lang-sep"> </span>
+                  <span class="en-text">Submit your form to generate an itemized Acknowledgment Slip with Print, Download &amp; WhatsApp options.</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Live Application Status Checker -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 no-print">
+              <h3 class="text-base font-bold text-slate-900 mb-1">
+                <span class="hi-text">आवेदन स्थिति जांचें</span><span class="lang-sep"> / </span><span class="en-text">Track Application Status</span>
+              </h3>
+              <p class="text-xs text-slate-500 mb-3">
+                <span class="hi-text">अपनी Application ID या 10 अंकों का मोबाइल नंबर दर्ज करें।</span>
+                <span class="lang-sep"> </span>
+                <span class="en-text">Enter your Application ID (e.g. MEM-...) or 10-digit mobile number.</span>
+              </p>
+              <div class="flex gap-2">
+                <input
+                  id="track-query-input"
+                  type="text"
+                  oninput="renderStatusTracker()"
+                  placeholder="MEM-2026-... or 98XXXXXXXX"
+                  class="flex-1 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2 text-xs sm:text-sm outline-none"
+                />
+                <button
+                  type="button"
+                  onclick="renderStatusTracker()"
+                  class="px-4 py-2 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs sm:text-sm font-bold transition cursor-pointer"
+                >
+                  Track
+                </button>
+              </div>
+              <div id="status-tracker-results" class="mt-3 space-y-2 text-xs"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== ADMIN PORTAL ==================== -->
+      <section id="admin-portal" class="hidden space-y-6 no-print">
+        <!-- Admin Login Gate -->
+        <div id="admin-login-box" class="max-w-md mx-auto bg-white rounded-2xl shadow-md border border-slate-200 p-6 sm:p-8">
+          <div class="text-center mb-5">
+            <div class="h-12 w-12 rounded-2xl bg-civic-900 text-amber-300 flex items-center justify-center text-xl font-extrabold mx-auto mb-2.5">
+              🔐
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900">
+              <span class="hi-text">एडमिन लॉगिन</span><span class="lang-sep"> / </span><span class="en-text">Admin Portal Login</span>
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">
+              MAJISA E-MITRA Operator Access • Demo ID: <strong class="font-mono text-slate-800">admin</strong>, PIN: <strong class="font-mono text-slate-800">1234</strong>
+            </p>
+          </div>
+
+          <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="space-y-4">
+            <div>
+              <label for="admin-username" class="block text-xs font-bold text-slate-700 mb-1">Admin ID</label>
+              <input
+                id="admin-username"
+                type="text"
+                required
+                value="admin"
+                class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label for="admin-pin" class="block text-xs font-bold text-slate-700 mb-1">Security PIN</label>
+              <input
+                id="admin-pin"
+                type="password"
+                required
+                maxlength="8"
+                placeholder="1234"
+                class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2.5 text-sm font-mono outline-none"
+              />
+            </div>
+            <button
+              type="submit"
+              class="w-full py-2.5 rounded-xl bg-civic-900 hover:bg-civic-800 text-white font-bold text-sm shadow transition cursor-pointer"
+            >
+              Unlock Admin Dashboard / डैशबोर्ड खोलें
+            </button>
+          </form>
+        </div>
+
+        <!-- Protected Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden space-y-6">
+          <!-- Admin Top Action Bar -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                Authenticated Operator
+              </span>
+              <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">
+                MAJISA E-MITRA — <span class="hi-text">एडमिन नियंत्रण कक्ष</span><span class="lang-sep"> / </span><span class="en-text">Admin Control Center</span>
+              </h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onclick="toggleAdminSection('settings')"
+                class="px-3.5 py-2 rounded-xl bg-civic-50 hover:bg-civic-100 text-civic-900 border border-civic-200 text-xs font-bold transition cursor-pointer"
+              >
+                ⚙️ QR UPI, WhatsApp &amp; Fees
+              </button>
+              <button
+                type="button"
+                onclick="toggleAdminSection('services')"
+                class="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition cursor-pointer"
+              >
+                🛠️ Manage Services
+              </button>
+              <button
+                type="button"
+                onclick="exportApplicationsCsv()"
+                class="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition cursor-pointer"
+              >
+                📊 Export CSV
+              </button>
+              <button
+                type="button"
+                onclick="openPinChangeModal()"
+                class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition cursor-pointer"
+              >
+                🔑 Change PIN
+              </button>
+              <button
+                type="button"
+                onclick="resetDemoData()"
+                class="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition cursor-pointer"
+              >
+                ♻️ Reset Demo
+              </button>
+              <button
+                type="button"
+                onclick="handleAdminLogout()"
+                class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer"
+              >
+                🔒 Lock
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards -->
+          <div id="admin-kpi-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+
+          <!-- Collapsible Panel: UPI, WhatsApp Number & Service Fees -->
+          <div id="admin-settings-panel" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+            <h3 class="text-base font-bold text-slate-900 mb-3">
+              ⚙️ Auto QR UPI ID, Majisa WhatsApp Number &amp; Service Fees
+            </h3>
+            <form id="admin-settings-form" onsubmit="saveAdminSettings(event)" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label for="setting-upi-id" class="block text-xs font-bold text-slate-700 mb-1">
+                    Majisa E-Mitra UPI ID
+                  </label>
+                  <input
+                    id="setting-upi-id"
+                    type="text"
+                    required
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2 text-sm font-mono outline-none"
+                  />
+                </div>
+                <div>
+                  <label for="setting-merchant-name" class="block text-xs font-bold text-slate-700 mb-1">
+                    Merchant / Payee Name
+                  </label>
+                  <input
+                    id="setting-merchant-name"
+                    type="text"
+                    required
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2 text-sm outline-none"
+                  />
+                </div>
+                <div>
+                  <label for="setting-whatsapp-number" class="block text-xs font-bold text-slate-700 mb-1">
+                    Majisa WhatsApp No. (10 Digits)
+                  </label>
+                  <input
+                    id="setting-whatsapp-number"
+                    type="tel"
+                    required
+                    pattern="[0-9]{10}"
+                    maxlength="10"
+                    placeholder="9784018715"
+                    class="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-civic-600 px-3.5 py-2 text-sm font-mono outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div class="text-xs font-bold text-slate-700 mb-2">Per-Service Fee (₹)</div>
+                <div id="setting-service-fees-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1"></div>
+              </div>
+
+              <div class="flex justify-end">
+                <button
+                  type="submit"
+                  class="px-5 py-2.5 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs sm:text-sm font-bold transition cursor-pointer"
+                >
+                  Save UPI, WhatsApp &amp; Fees
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Collapsible Panel: Add / Enable / Disable Services -->
+          <div id="admin-services-panel" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-900">🛠️ Add New Service or Toggle Availability</h3>
+            <form id="add-service-form" onsubmit="handleAddService(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <input
+                id="new-svc-name-en"
+                type="text"
+                required
+                placeholder="Service Name (English)"
+                class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm outline-none"
+              />
+              <input
+                id="new-svc-name-hi"
+                type="text"
+                required
+                placeholder="सेवा का नाम (हिन्दी)"
+                class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm outline-none"
+              />
+              <input
+                id="new-svc-fee"
+                type="number"
+                min="0"
+                required
+                placeholder="Fee (₹)"
+                class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm outline-none"
+              />
+              <button
+                type="submit"
+                class="rounded-xl bg-saffron-600 hover:bg-saffron-500 text-white font-bold text-xs sm:text-sm py-2 px-4 transition cursor-pointer"
+              >
+                + Add Service
+              </button>
+            </form>
+            <div id="admin-service-toggles" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-2"></div>
+          </div>
+
+          <!-- Applications Table & Filters -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-slate-900">
+                  <span class="hi-text">प्राप्त ग्राहक आवेदन</span><span class="lang-sep"> / </span><span class="en-text">Customer Submissions</span>
+                </h3>
+                <p class="text-xs text-slate-500">Verify payments, update work status, view/print slips &amp; send WhatsApp receipts.</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <input
+                  id="admin-search-input"
+                  type="search"
+                  oninput="renderAdminTable()"
+                  placeholder="Search ID, name, mobile, UTR..."
+                  class="rounded-xl border border-slate-300 bg-slate-50 focus:bg-white px-3 py-2 text-xs sm:text-sm outline-none"
+                />
+                <select
+                  id="admin-status-filter"
+                  onchange="renderAdminTable()"
+                  class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs sm:text-sm font-semibold outline-none"
+                >
+                  <option value="ALL">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Process">In Process</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 text-xs uppercase bg-slate-50/80">
+                    <th class="py-3 px-3 rounded-tl-xl">App ID &amp; Date</th>
+                    <th class="py-3 px-3">Customer</th>
+                    <th class="py-3 px-3">Service</th>
+                    <th class="py-3 px-3">Payment</th>
+                    <th class="py-3 px-3">Work Status</th>
+                    <th class="py-3 px-3 text-right rounded-tr-xl">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-applications-tbody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Application Detail Modal for Admin -->
+    <div id="detail-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="bg-civic-900 text-white px-5 py-4 flex items-center justify-between">
+          <h3 class="font-bold text-base">Application Details &amp; Slip</h3>
+          <button type="button" onclick="closeDetailModal()" class="text-blue-100 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
+        </div>
+        <div id="detail-modal-body" class="p-5 space-y-2.5 text-xs sm:text-sm text-slate-700"></div>
+        <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeDetailModal()"
+            class="px-4 py-2 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs font-bold transition cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-Submission Acknowledgment & WhatsApp Confirmation Modal -->
+    <div id="slip-confirmation-modal" class="hidden fixed inset-0 z-50 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
+        <div class="bg-civic-900 text-white px-5 py-4 flex items-center justify-between shrink-0">
+          <div>
+            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+              Slip Ready / पावती रसीद तैयार
+            </span>
+            <h3 class="font-bold text-base sm:text-lg mt-1">
+              Acknowledgment Slip &amp; WhatsApp / आवेदन पावती व व्हाट्सएप
+            </h3>
+          </div>
+          <button type="button" onclick="closeSlipConfirmationModal()" class="text-blue-100 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
+        </div>
+        <div id="slip-confirmation-modal-body" class="p-5 overflow-y-auto space-y-4 text-sm text-slate-700"></div>
+        <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="downloadReceiptPdf()"
+              class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold transition shadow-xs cursor-pointer"
+            >
+              📄 Download PDF
+            </button>
+            <button
+              type="button"
+              onclick="printAcknowledgmentSlip()"
+              class="px-3.5 py-2 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs font-bold transition cursor-pointer"
+            >
+              🖨️ Print Slip
+            </button>
+          </div>
+          <button
+            type="button"
+            onclick="closeSlipConfirmationModal()"
+            class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition cursor-pointer"
+          >
+            Close / बंद करें
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIN Change Modal -->
+    <div id="pin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+      <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div class="bg-civic-900 text-white px-5 py-4 flex items-center justify-between">
+          <h3 class="font-bold text-sm sm:text-base">Change Admin PIN</h3>
+          <button type="button" onclick="closePinChangeModal()" class="text-blue-100 hover:text-white text-2xl leading-none cursor-pointer">&times;</button>
+        </div>
+        <form onsubmit="handlePinChange(event)" class="p-5 space-y-3">
+          <div>
+            <label for="current-pin-input" class="block text-xs font-bold text-slate-700 mb-1">Current PIN</label>
+            <input id="current-pin-input" type="password" required class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-mono outline-none" />
+          </div>
+          <div>
+            <label for="new-pin-input" class="block text-xs font-bold text-slate-700 mb-1">New PIN (4–8 digits)</label>
+            <input id="new-pin-input" type="password" required pattern="[0-9]{4,8}" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-mono outline-none" />
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs sm:text-sm font-bold transition cursor-pointer">
+            Update PIN
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-4 sm:px-8 text-xs text-slate-500 no-print">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div>
+          <strong>MAJISA E-MITRA | माजीसा ई-मित्र</strong> — Bilingual Citizen &amp; Operator Portal • WhatsApp: <span class="font-mono font-semibold text-slate-700" id="footer-wa-number">9784018715</span>
+        </div>
+        <div>Local browser storage enabled (<code>localStorage</code>)</div>
+      </div>
+    </footer>
+
+    <script>
+      /**
+       * All 16 core + expanded E-Mitra, tax, exam, university, school, and CSC services.
+       */
+      const BASE_SERVICES = [
+        {
+          id: 'pan-card',
+          category: 'Tax & ID',
+          nameEn: 'PAN Card (UTIITSL / Protean)',
+          nameHi: 'पैन कार्ड आवेदन / सुधार',
+          fee: 110,
+          docs: ['Aadhaar Card', '2 Passport Photos', 'Mobile Number (OTP)', 'Old PAN (if correction)']
+        },
+        {
+          id: 'itr-filing',
+          category: 'Tax & ID',
+          nameEn: 'ITR E-Filing',
+          nameHi: 'आयकर रिटर्न (ITR) फाइलिंग',
+          fee: 250,
+          docs: ['PAN Card', 'Aadhaar Card', 'AIS / Form 26AS / Bank Statement', 'Form 16 (if salaried)']
+        },
+        {
+          id: 'rte-admission',
+          category: 'Education',
+          nameEn: 'RTE School Admission',
+          nameHi: 'आरटीई निःशुल्क स्कूल प्रवेश',
+          fee: 50,
+          docs: ['Child Birth Certificate', 'Parent Aadhaar & Jan Aadhaar', 'Caste / EWS / BPL / Income Proof', 'Child Photo']
+        },
+        {
+          id: 'neet-ug',
+          category: 'Education',
+          nameEn: 'NEET (UG) Form',
+          nameHi: 'नीट (यूजी) परीक्षा आवेदन',
+          fee: 150,
+          docs: ['10th & 12th Marksheets / Admit Card', 'Aadhaar Card', 'Passport & Postcard Photos', 'Signature & Thumb Impression']
+        },
+        {
+          id: 'jnvu-exam',
+          category: 'Education',
+          nameEn: 'JNVU Exam Form',
+          nameHi: 'जेएनवीयू परीक्षा फॉर्म',
+          fee: 100,
+          docs: ['Previous Marksheet / Enrollment No.', 'ABC ID (APAAR ID)', 'Aadhaar & Photo/Sign', 'Active Mobile & Email']
+        },
+        {
+          id: 'ration-migration',
+          category: 'Citizen & CSC',
+          nameEn: 'Ration Card Migration',
+          nameHi: 'राशन कार्ड माइग्रेशन / स्थानांतरण',
+          fee: 60,
+          docs: ['Existing Ration / NFSA Details', 'Jan Aadhaar Card', 'Aadhaar of Members', 'Address / Transfer Proof']
+        },
+        {
+          id: 'gazette-name-change',
+          category: 'Citizen & CSC',
+          nameEn: 'Rajasthan Gazette Name Change',
+          nameHi: 'राजस्थान राजपत्र नाम परिवर्तन',
+          fee: 300,
+          docs: ['Notary Affidavit for Name Change', '2 Newspaper Cuttings', 'Aadhaar & Passport Photo', 'Supporting ID / Marksheet']
+        },
+        {
+          id: 'csc-digital-services',
+          category: 'Citizen & CSC',
+          nameEn: 'Digital Service Center / CSC Services',
+          nameHi: 'डिजिटल सेवा केंद्र / सीएससी सेवाएं',
+          fee: 50,
+          docs: ['Aadhaar / Jan Aadhaar', 'Applicant Photo', 'Relevant Application Form', 'Registered Mobile Number']
+        },
+        {
+          id: 'aadhaar-update',
+          category: 'Tax & ID',
+          nameEn: 'Aadhaar Update / PVC Card',
+          nameHi: 'आधार अपडेट / पीवीसी कार्ड',
+          fee: 50,
+          docs: ['Aadhaar Number / Enrolment ID', 'Registered Mobile', 'Address / Identity Proof (if update)']
+        },
+        {
+          id: 'jan-aadhaar',
+          category: 'Citizen & CSC',
+          nameEn: 'Jan Aadhaar Card',
+          nameHi: 'जन आधार कार्ड सेवाएं',
+          fee: 50,
+          docs: ['Family Members Aadhaar', 'Head of Family Details', 'Bank Passbook & Mobile', 'Passport Photos']
+        },
+        {
+          id: 'voter-id',
+          category: 'Citizen & CSC',
+          nameEn: 'Voter ID Card (NVSP)',
+          nameHi: 'मतदाता पहचान पत्र सेवाएं',
+          fee: 50,
+          docs: ['Aadhaar Card', 'Age & Residence Proof', 'Passport Photo', 'Existing EPIC (if shifting/correction)']
+        },
+        {
+          id: 'driving-licence',
+          category: 'Citizen & CSC',
+          nameEn: 'Driving Licence / Sarathi',
+          nameHi: 'ड्राइविंग लाइसेंस सेवाएं',
+          fee: 150,
+          docs: ['Age & Address Proof', 'Aadhaar Card', 'Passport Photo & Signature', 'Medical Form 1A (if applicable)']
+        },
+        {
+          id: 'certificates-bcmd',
+          category: 'Citizen & CSC',
+          nameEn: 'Birth / Death / Caste / Domicile Cert.',
+          nameHi: 'जन्म / मृत्यु / जाति / मूल निवास प्रमाण पत्र',
+          fee: 60,
+          docs: ['Jan Aadhaar & Aadhaar Card', 'Hospital / Ward / Patwari Proof', 'Ration Card / Electricity Bill', 'Applicant Photo']
+        },
+        {
+          id: 'utility-bills',
+          category: 'Bills & Schemes',
+          nameEn: 'Electricity / Water / Mobile Bill',
+          nameHi: 'बिजली / पानी / मोबाइल बिल भुगतान',
+          fee: 20,
+          docs: ['Consumer K-Number / Account ID', 'Mobile Number', 'Previous Bill Copy (optional)']
+        },
+        {
+          id: 'passport-assistance',
+          category: 'Tax & ID',
+          nameEn: 'Passport Assistance',
+          nameHi: 'पासपोर्ट आवेदन सहायता',
+          fee: 200,
+          docs: ['Aadhaar Card', 'PAN Card / 10th Certificate', 'Birth / Address Proof', 'Email & Mobile Number']
+        },
+        {
+          id: 'eshram-ayushman-pension',
+          category: 'Bills & Schemes',
+          nameEn: 'E-Shram / Ayushman / Pension',
+          nameHi: 'ई-श्रम / आयुष्मान / पेंशन योजनाएं',
+          fee: 40,
+          docs: ['Aadhaar & Jan Aadhaar', 'Bank Account Passbook', 'Mobile Number (OTP)', 'Scheme Eligibility Proof']
+        }
+      ];
+
+      const STORAGE_KEYS = {
+        APPLICATIONS: 'majisa_emitra_applications_v2',
+        SETTINGS: 'majisa_emitra_settings_v2',
+        CUSTOM_SERVICES: 'majisa_emitra_custom_services_v2',
+        DISABLED_SERVICES: 'majisa_emitra_disabled_services_v2',
+        ADMIN_PIN: 'majisa_emitra_admin_pin_v2',
+        DISPLAY_MODE: 'majisa_emitra_display_mode_v2'
+      };
+
+      const DEFAULT_SETTINGS = {
+        upiId: 'majisa.emitra@okicici',
+        merchantName: 'MAJISA E-MITRA',
+        whatsappNumber: '9784018715',
+        fees: BASE_SERVICES.reduce((acc, s) => {
+          acc[s.id] = s.fee;
+          return acc;
+        }, {})
+      };
+
+      const DEMO_APPLICATIONS = [
+        {
+          id: 'MEM-2026-1001',
+          createdAt: '22/11/2026, 11:15 AM',
+          customerName: 'Mahaveer Prajapat / महावीर प्रजापत',
+          mobile: '9829011223',
+          serviceId: 'pan-card',
+          serviceName: 'PAN Card (UTIITSL / Protean) / पैन कार्ड आवेदन / सुधार',
+          idDoc: 'Aadhaar 4589-XXXX-1120',
+          fee: 110,
+          paymentMethod: 'Auto QR Code',
+          paymentVerification: 'Paid & Verified',
+          txnRef: 'UTR425891002211',
+          notes: 'New PAN application with Aadhaar e-KYC',
+          status: 'In Process'
+        },
+        {
+          id: 'MEM-2026-1002',
+          createdAt: '22/11/2026, 01:40 PM',
+          customerName: 'Sunita Devi / सुनीता देवी',
+          mobile: '9784018715',
+          serviceId: 'jnvu-exam',
+          serviceName: 'JNVU Exam Form / जेएनवीयू परीक्षा फॉर्म',
+          idDoc: 'ABC-9988776655',
+          fee: 100,
+          paymentMethod: 'Counter / Cash',
+          paymentVerification: 'Paid & Verified',
+          txnRef: 'CASH-COUNTER-02',
+          notes: 'BA Final Year regular exam form',
+          status: 'Completed'
+        }
+      ];
+
+      let appSettings = loadSettings();
+      let allServices = [];
+      let selectedServiceId = 'pan-card';
+      let selectedCategory = 'All';
+      let isAdminAuthenticated = false;
+      let latestReceiptApp = null;
+      let qrUnlockedSnapshot = null;
+
+      function loadSettings() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+          if (!raw) return { ...DEFAULT_SETTINGS, fees: { ...DEFAULT_SETTINGS.fees } };
+          const parsed = JSON.parse(raw);
+          const cleanWa = String(parsed.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber).replace(/\D/g, '');
+          return {
+            upiId: (parsed.upiId || DEFAULT_SETTINGS.upiId).trim(),
+            merchantName: (parsed.merchantName || DEFAULT_SETTINGS.merchantName).trim(),
+            whatsappNumber: /^[0-9]{10}$/.test(cleanWa) ? cleanWa : DEFAULT_SETTINGS.whatsappNumber,
+            fees: { ...DEFAULT_SETTINGS.fees, ...(parsed.fees || {}) }
+          };
+        } catch (err) {
+          console.error('Error loading settings:', err);
+          return { ...DEFAULT_SETTINGS, fees: { ...DEFAULT_SETTINGS.fees } };
+        }
+      }
+
+      function saveSettingsToStorage(settings) {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+      }
+
+      function getCustomServices() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_SERVICES);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function getDisabledServiceIds() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.DISABLED_SERVICES);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function refreshServicesCatalog() {
+        const custom = getCustomServices();
+        const disabled = new Set(getDisabledServiceIds());
+        const combined = [...BASE_SERVICES, ...custom].map((svc) => {
+          const customFee = appSettings.fees[svc.id];
+          return {
+            ...svc,
+            fee: typeof customFee === 'number' && !Number.isNaN(customFee) ? customFee : svc.fee,
+            enabled: !disabled.has(svc.id)
+          };
+        });
+        allServices = combined;
+        const activeList = getActiveServices();
+        if (!activeList.some((s) => s.id === selectedServiceId) && activeList.length > 0) {
+          selectedServiceId = activeList[0].id;
+        }
+        syncWhatsAppBadges();
+      }
+
+      function getActiveServices() {
+        return allServices.filter((s) => s.enabled);
+      }
+
+      function syncWhatsAppBadges() {
+        const wa = appSettings.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+        const heroEl = document.getElementById('hero-wa-number');
+        const slipEl = document.getElementById('slip-wa-badge');
+        const footEl = document.getElementById('footer-wa-number');
+        if (heroEl) heroEl.textContent = wa;
+        if (slipEl) slipEl.textContent = `WhatsApp Desk: ${wa}`;
+        if (footEl) footEl.textContent = wa;
+      }
+
+      function getApplications() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.APPLICATIONS);
+          if (!raw) {
+            localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(DEMO_APPLICATIONS));
+            return [...DEMO_APPLICATIONS];
+          }
+          return JSON.parse(raw);
+        } catch (err) {
+          console.error('Failed to read applications:', err);
+          return [...DEMO_APPLICATIONS];
+        }
+      }
+
+      function saveApplications(apps) {
+        localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(apps));
+      }
+
+      function getAdminPin() {
+        return localStorage.getItem(STORAGE_KEYS.ADMIN_PIN) || '1234';
+      }
+
+      function setDisplayMode(mode) {
+        localStorage.setItem(STORAGE_KEYS.DISPLAY_MODE, mode);
+        document.body.classList.remove('mode-bilingual', 'mode-hi', 'mode-en');
+        document.body.classList.add(`mode-${mode}`);
+
+        const hiEls = document.querySelectorAll('.hi-text');
+        const enEls = document.querySelectorAll('.en-text');
+        const sepEls = document.querySelectorAll('.lang-sep');
+
+        hiEls.forEach((el) => el.classList.toggle('hidden', mode === 'en'));
+        enEls.forEach((el) => el.classList.toggle('hidden', mode === 'hi'));
+        sepEls.forEach((el) => el.classList.toggle('hidden', mode !== 'bilingual'));
+
+        ['bilingual', 'hi', 'en'].forEach((m) => {
+          const btn = document.getElementById(`lang-btn-${m}`);
+          if (!btn) return;
+          if (m === mode) {
+            btn.className = 'px-2.5 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold transition cursor-pointer';
+          } else {
+            btn.className = 'px-2.5 py-1.5 rounded-lg text-blue-100 hover:text-white transition cursor-pointer';
+          }
+        });
+      }
+
+      function switchPortal(portal) {
+        const custPortal = document.getElementById('customer-portal');
+        const admPortal = document.getElementById('admin-portal');
+        const custBtn = document.getElementById('nav-customer-btn');
+        const admBtn = document.getElementById('nav-admin-btn');
+
+        if (portal === 'admin') {
+          custPortal.classList.add('hidden');
+          admPortal.classList.remove('hidden');
+          admBtn.className =
+            'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-civic-900 shadow-xs transition cursor-pointer flex items-center gap-1.5';
+          custBtn.className =
+            'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-blue-100 hover:text-white transition cursor-pointer';
+          renderAdminView();
+        } else {
+          admPortal.classList.add('hidden');
+          custPortal.classList.remove('hidden');
+          custBtn.className =
+            'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-white text-civic-900 shadow-xs transition cursor-pointer';
+          admBtn.className =
+            'px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold text-blue-100 hover:text-white transition cursor-pointer flex items-center gap-1.5';
+        }
+      }
+
+      function renderCategoryFilters() {
+        const bar = document.getElementById('category-filter-bar');
+        const categories = ['All', 'Tax & ID', 'Education', 'Citizen & CSC', 'Bills & Schemes'];
+        bar.innerHTML = categories
+          .map((cat) => {
+            const active = selectedCategory === cat;
+            return `
+              <button
+                type="button"
+                onclick="selectCategory('${escapeJs(cat)}')"
+                class="px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                  active
+                    ? 'bg-civic-900 text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }"
+              >
+                ${escapeHtml(cat)}
+              </button>
+            `;
+          })
+          .join('');
+      }
+
+      function selectCategory(cat) {
+        selectedCategory = cat;
+        renderCategoryFilters();
+        renderServiceCards();
+      }
+
+      function renderServiceCards() {
+        const grid = document.getElementById('service-cards-grid');
+        const q = (document.getElementById('service-search-input')?.value || '').trim().toLowerCase();
+        const active = getActiveServices().filter((svc) => {
+          const matchesCat = selectedCategory === 'All' || svc.category === selectedCategory;
+          const matchesQuery =
+            !q ||
+            svc.nameEn.toLowerCase().includes(q) ||
+            svc.nameHi.toLowerCase().includes(q) ||
+            svc.category.toLowerCase().includes(q);
+          return matchesCat && matchesQuery;
+        });
+
+        if (active.length === 0) {
+          grid.innerHTML = `<div class="col-span-full text-center py-6 text-xs text-slate-500">No matching services found / कोई सेवा नहीं मिली।</div>`;
+          return;
+        }
+
+        grid.innerHTML = active
+          .map((svc) => {
+            const isSelected = svc.id === selectedServiceId;
+            return `
+              <button
+                type="button"
+                onclick="selectService('${escapeJs(svc.id)}')"
+                class="text-left rounded-xl border-2 p-3.5 transition cursor-pointer flex flex-col justify-between gap-2 ${
+                  isSelected
+                    ? 'border-civic-700 bg-civic-50/90 shadow-xs'
+                    : 'border-slate-200 bg-white hover:border-slate-300'
+                }"
+              >
+                <div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">${escapeHtml(svc.category)}</span>
+                    <span class="text-sm font-extrabold text-emerald-700">₹${Number(svc.fee || 0)}</span>
+                  </div>
+                  <div class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5 leading-snug">${escapeHtml(svc.nameEn)}</div>
+                  <div class="text-xs text-slate-600 font-medium">${escapeHtml(svc.nameHi)}</div>
+                </div>
+              </button>
+            `;
+          })
+          .join('');
+      }
+
+      function populateServiceDropdown() {
+        const select = document.getElementById('customer-service-select');
+        const active = getActiveServices();
+        select.innerHTML = active
+          .map(
+            (svc) =>
+              `<option value="${escapeAttr(svc.id)}" ${svc.id === selectedServiceId ? 'selected' : ''}>${escapeHtml(
+                svc.nameEn
+              )} — ${escapeHtml(svc.nameHi)} (₹${Number(svc.fee || 0)})</option>`
+          )
+          .join('');
+      }
+
+      function selectService(serviceId) {
+        const active = getActiveServices();
+        const found = active.find((s) => s.id === serviceId) || active[0];
+        if (!found) return;
+        selectedServiceId = found.id;
+
+        const dropdown = document.getElementById('customer-service-select');
+        if (dropdown && dropdown.value !== found.id) dropdown.value = found.id;
+
+        document.getElementById('hero-selected-fee').textContent = `₹${Number(found.fee || 0)}`;
+        document.getElementById('hero-selected-service').textContent = `${found.nameEn} • ${found.nameHi}`;
+        document.getElementById('form-payable-amount').textContent = `₹${Number(found.fee || 0)}`;
+
+        document.getElementById('docs-service-title').textContent = `${found.nameEn} (${found.nameHi})`;
+        const docsList = document.getElementById('service-docs-list');
+        const docsArr = Array.isArray(found.docs) && found.docs.length ? found.docs : ['Aadhaar Card', 'Passport Photo', 'Mobile Number'];
+        docsList.innerHTML = docsArr.map((d) => `<li>${escapeHtml(d)}</li>`).join('');
+
+        renderServiceCards();
+        onPaymentMethodChange();
+      }
+
+      function getCurrentCustomerGateSnapshot() {
+        const name = (document.getElementById('customer-name')?.value || '').trim();
+        const mobile = (document.getElementById('customer-mobile')?.value || '').trim();
+        const idDoc = (document.getElementById('customer-id-doc')?.value || '').trim();
+        return `${selectedServiceId}|${name}|${mobile}|${idDoc}`;
+      }
+
+      function isCustomerGateValid() {
+        const name = (document.getElementById('customer-name')?.value || '').trim();
+        const mobile = (document.getElementById('customer-mobile')?.value || '').trim();
+        const idDoc = (document.getElementById('customer-id-doc')?.value || '').trim();
+        return name.length >= 2 && /^[0-9]{10}$/.test(mobile) && idDoc.length >= 2;
+      }
+
+      function isQrCurrentlyUnlocked() {
+        return qrUnlockedSnapshot !== null && qrUnlockedSnapshot === getCurrentCustomerGateSnapshot();
+      }
+
+      function onCustomerGateFieldChange() {
+        const method = getSelectedPaymentMethod();
+        if (method === 'Auto QR Code') {
+          onPaymentMethodChange();
+        }
+      }
+
+      function unlockAutoQrCode() {
+        if (!isCustomerGateValid()) {
+          showToast(
+            'Please enter Full Name, 10-digit Mobile Number & Aadhaar/ID details first. (कृपया नाम, 10 अंकों का मोबाइल नंबर व आईडी विवरण भरें)',
+            'error'
+          );
+          return;
+        }
+        qrUnlockedSnapshot = getCurrentCustomerGateSnapshot();
+        onPaymentMethodChange();
+        showToast('Auto UPI QR Code unlocked! Scan & pay, then submit for your slip.', 'success');
+      }
+
+      function lockAutoQrCode() {
+        qrUnlockedSnapshot = null;
+        onPaymentMethodChange();
+      }
+
+      function getSelectedPaymentMethod() {
+        const checked = document.querySelector('input[name="paymentMethod"]:checked');
+        return checked ? checked.value : 'Auto QR Code';
+      }
+
+      function buildUpiPaymentUri(service) {
+        const upiId = encodeURIComponent(appSettings.upiId || DEFAULT_SETTINGS.upiId);
+        const payeeName = encodeURIComponent(appSettings.merchantName || DEFAULT_SETTINGS.merchantName);
+        const amount = encodeURIComponent(String(Number(service.fee || 0)));
+        const note = encodeURIComponent(`MAJISA E-MITRA - ${service.nameEn}`);
+        return `upi://pay?pa=${upiId}&pn=${payeeName}&am=${amount}&cu=INR&tn=${note}`;
+      }
+
+      function renderFallbackQrVisual(targetEl, upiUri, service) {
+        targetEl.innerHTML = `
+          <div class="w-[132px] h-[132px] rounded-xl bg-gradient-to-br from-civic-900 via-civic-800 to-saffron-600 text-white p-2.5 flex flex-col justify-between text-center shadow-xs">
+            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">UPI QR PAY</div>
+            <div class="text-sm font-extrabold">₹${Number(service.fee || 0)}</div>
+            <div class="text-[9px] font-mono leading-tight break-all text-blue-100">${escapeHtml(appSettings.upiId)}</div>
+          </div>
+        `;
+      }
+
+      function onPaymentMethodChange() {
+        const method = getSelectedPaymentMethod();
+        const box = document.getElementById('payment-details-box');
+        const svc = allServices.find((s) => s.id === selectedServiceId) || getActiveServices()[0];
+        if (!svc || !box) return;
+
+        if (method === 'Auto QR Code') {
+          if (!isQrCurrentlyUnlocked()) {
+            const wasChanged = qrUnlockedSnapshot !== null;
+            box.innerHTML = `
+              <div class="rounded-xl bg-amber-50 border border-amber-200 p-3.5 text-xs text-amber-950 space-y-2.5">
+                <div class="font-bold flex items-center gap-1.5">
+                  <span>🔒</span>
+                  <span>
+                    ${
+                      wasChanged
+                        ? 'Details or service changed — QR locked again. Please verify & unlock QR. / विवरण या सेवा बदली गई है, कृपया पुनः QR दिखाएं।'
+                        : 'Fill Customer Name, 10-Digit Mobile & Aadhaar/ID first to unlock Auto QR Code. / पहले ग्राहक विवरण भरें, फिर ऑटो QR कोड दिखाएं।'
+                    }
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onclick="unlockAutoQrCode()"
+                  class="px-4 py-2 rounded-xl bg-civic-900 hover:bg-civic-800 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                >
+                  🔓 Proceed to QR Payment / विवरण जांचें व QR दिखाएं
+                </button>
+              </div>
+            `;
+            return;
+          }
+
+          const upiUri = buildUpiPaymentUri(svc);
+          box.innerHTML = `
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200 shrink-0">
+                <div id="auto-qr-canvas" class="flex items-center justify-center min-w-[132px] min-h-[132px]"></div>
+              </div>
+              <div class="space-y-1.5 text-xs text-slate-700 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                    ✓ Auto QR Unlocked
+                  </span>
+                  <button
+                    type="button"
+                    onclick="lockAutoQrCode()"
+                    class="text-[11px] font-semibold text-slate-500 hover:text-slate-800 underline cursor-pointer"
+                  >
+                    Lock QR
+                  </button>
+                </div>
+                <div class="font-bold text-slate-900">Scan with GPay, PhonePe, Paytm or BHIM</div>
+                <div>Payee: <strong class="font-mono">${escapeHtml(appSettings.merchantName)}</strong></div>
+                <div>UPI ID: <strong class="font-mono text-civic-800">${escapeHtml(appSettings.upiId)}</strong></div>
+                <div>Amount: <strong class="text-emerald-700 text-sm">₹${Number(svc.fee || 0)}</strong></div>
+                <div class="text-[11px] text-slate-500 break-all font-mono">${escapeHtml(upiUri)}</div>
+              </div>
+            </div>
+          `;
+
+          const qrTarget = document.getElementById('auto-qr-canvas');
+          if (qrTarget) {
+            qrTarget.innerHTML = '';
+            try {
+              if (typeof QRCode !== 'undefined') {
+                new QRCode(qrTarget, {
+                  text: upiUri,
+                  width: 132,
+                  height: 132,
+                  correctLevel: QRCode.CorrectLevel.M
+                });
+              } else {
+                renderFallbackQrVisual(qrTarget, upiUri, svc);
+              }
+            } catch (qrErr) {
+              console.warn('QRCode render fallback:', qrErr);
+              renderFallbackQrVisual(qrTarget, upiUri, svc);
+            }
+          }
+        } else if (method === 'UPI ID / App') {
+          box.innerHTML = `
+            <div class="text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-slate-900">Direct UPI Transfer / सीधा यूपीआई भुगतान</div>
+              <div>Send <strong>₹${Number(svc.fee || 0)}</strong> to UPI ID: <strong class="font-mono text-civic-800">${escapeHtml(appSettings.upiId)}</strong></div>
+              <div class="text-slate-500">Enter the 12-digit UTR number below after paying and submit for your slip.</div>
+            </div>
+          `;
+        } else if (method === 'Debit / Credit Card') {
+          box.innerHTML = `
+            <div class="text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-slate-900">Card / POS Payment / कार्ड भुगतान</div>
+              <div>Payable Fee: <strong class="text-emerald-700">₹${Number(svc.fee || 0)}</strong> at Majisa E-Mitra desk or via authorized card link.</div>
+              <div class="text-slate-500">Enter card approval / transaction reference below to generate your slip.</div>
+            </div>
+          `;
+        } else {
+          box.innerHTML = `
+            <div class="text-xs text-slate-700 space-y-1">
+              <div class="font-bold text-slate-900">Counter / Cash Payment / काउंटर नकद भुगतान</div>
+              <div>Pay <strong>₹${Number(svc.fee || 0)}</strong> in cash at Majisa E-Mitra counter and submit to receive your Acknowledgment Slip &amp; WhatsApp receipt.</div>
+            </div>
+          `;
+        }
+      }
+
+      function handleCustomerSubmit(event) {
+        event.preventDefault();
+        try {
+          const svc = allServices.find((s) => s.id === selectedServiceId) || getActiveServices()[0];
+          if (!svc) {
+            showToast('Please select a valid service.', 'error');
+            return;
+          }
+
+          const customerName = document.getElementById('customer-name').value.trim();
+          const mobile = document.getElementById('customer-mobile').value.trim();
+          const idDoc = document.getElementById('customer-id-doc').value.trim();
+          const notes = document.getElementById('customer-notes').value.trim();
+          const paymentMethod = getSelectedPaymentMethod();
+          const rawTxn = (document.getElementById('customer-utr-ref')?.value || '').trim();
+
+          if (customerName.length < 2) {
+            showToast('Please enter customer full name. (पूरा नाम दर्ज करें)', 'error');
+            return;
+          }
+          if (!/^[0-9]{10}$/.test(mobile)) {
+            showToast('Please enter a valid 10-digit mobile number. (10 अंकों का मोबाइल नंबर दर्ज करें)', 'error');
+            return;
+          }
+          if (idDoc.length < 2) {
+            showToast('Please enter Aadhaar / ID / Application reference. (आधार / आईडी विवरण दर्ज करें)', 'error');
+            return;
+          }
+
+          const isVerifiedNow = Boolean(rawTxn) || paymentMethod === 'Counter / Cash';
+          const txnRef =
+            rawTxn ||
+            (paymentMethod === 'Counter / Cash'
+              ? 'CASH-COUNTER'
+              : `${paymentMethod.replace(/[^A-Z]/gi, '').toUpperCase().slice(0, 4)}-${Date.now().toString().slice(-6)}`);
+
+          const now = new Date();
+          const appId = `MEM-${now.getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`;
+          const createdAt = now.toLocaleString('en-IN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const newApplication = {
+            id: appId,
+            createdAt,
+            customerName,
+            mobile,
+            serviceId: svc.id,
+            serviceName: `${svc.nameEn} / ${svc.nameHi}`,
+            idDoc,
+            fee: Number(svc.fee || 0),
+            paymentMethod,
+            paymentVerification: isVerifiedNow ? 'Paid & Verified' : 'Payment Pending',
+            txnRef,
+            notes,
+            status: 'Pending'
+          };
+
+          const existing = getApplications();
+          existing.unshift(newApplication);
+          saveApplications(existing);
+
+          renderReceipt(newApplication);
+          renderStatusTracker();
+
+          qrUnlockedSnapshot = null;
+          document.getElementById('customer-name').value = '';
+          document.getElementById('customer-mobile').value = '';
+          document.getElementById('customer-id-doc').value = '';
+          document.getElementById('customer-notes').value = '';
+          const utrEl = document.getElementById('customer-utr-ref');
+          if (utrEl) utrEl.value = '';
+          onPaymentMethodChange();
+
+          if (isAdminAuthenticated) {
+            renderAdminView();
+          }
+
+          openSlipConfirmationModal(newApplication);
+          downloadReceiptPdf({ silentAuto: true });
+          attemptAutoOpenCustomerWhatsApp(newApplication);
+          showToast(`Acknowledgment Slip created & PDF downloaded! ID: ${appId} (पावती व PDF तैयार)`, 'success');
+        } catch (err) {
+          console.error('Submission error:', err);
+          showToast('Could not submit application: ' + err.message, 'error');
+        }
+      }
+
+      function formatIndianWhatsAppPhone(mobile) {
+        const digits = String(mobile || '').replace(/\D/g, '');
+        if (digits.length === 10) return `91${digits}`;
+        if (digits.length === 12 && digits.startsWith('91')) return digits;
+        return digits;
+      }
+
+      function buildWhatsAppSlipMessage(app) {
+        const centerWa = appSettings?.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+        return [
+          '*MAJISA E-MITRA | माजीसा ई-मित्र*',
+          '📄 *Acknowledgment Slip / आवेदन पावती रसीद*',
+          '----------------------------------------',
+          `🆔 *Application ID:* ${app.id}`,
+          `📅 *Date & Time:* ${app.createdAt}`,
+          `👤 *Customer / ग्राहक:* ${app.customerName}`,
+          `📞 *Mobile / मोबाइल:* ${app.mobile}`,
+          `🛠️ *Service / सेवा:* ${app.serviceName}`,
+          `🪪 *Doc / ID No.:* ${app.idDoc}`,
+          `💰 *Fee / Amount:* ₹${Number(app.fee || 0)}`,
+          `💳 *Payment Mode:* ${app.paymentMethod}`,
+          `✅ *Payment Status:* ${app.paymentVerification}`,
+          `🔢 *UTR / Ref No.:* ${app.txnRef || '-'}`,
+          `📌 *Work Status:* ${app.status}`,
+          '----------------------------------------',
+          `📲 *Majisa E-Mitra WhatsApp:* ${centerWa}`,
+          'धन्यवाद! आपका आवेदन दर्ज कर लिया गया है।'
+        ].join('\n');
+      }
+
+      function getWhatsAppShareUrl(mobile10OrIntl, message) {
+        const phone = formatIndianWhatsAppPhone(mobile10OrIntl);
+        return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      }
+
+      function attemptAutoOpenCustomerWhatsApp(app) {
+        try {
+          const msg = buildWhatsAppSlipMessage(app);
+          const url = getWhatsAppShareUrl(app.mobile, msg);
+          const win = window.open(url, '_blank', 'noopener,noreferrer');
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            showToast(
+              'Browser pop-up blocked: Click the WhatsApp button on your slip to send. (पॉप-अप ब्लॉक होने पर WhatsApp बटन दबाएं)',
+              'info'
+            );
+          }
+        } catch (err) {
+          console.warn('Auto WhatsApp open skipped:', err);
+        }
+      }
+
+      function printAcknowledgmentSlip() {
+        const app = latestReceiptApp || getApplications()[0];
+        if (!app) {
+          showToast('No Acknowledgment Slip available to print yet.', 'info');
+          return;
+        }
+        renderReceipt(app);
+        window.print();
+      }
+
+      function renderReceipt(app) {
+        latestReceiptApp = app;
+        const container = document.getElementById('receipt-content');
+        const centerWa = appSettings?.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+        const waMsg = buildWhatsAppSlipMessage(app);
+        const customerWaUrl = getWhatsAppShareUrl(app.mobile, waMsg);
+        const centerWaUrl = getWhatsAppShareUrl(centerWa, waMsg);
+        const isPaid = app.paymentVerification === 'Paid & Verified';
+
+        container.innerHTML = `
+          <div id="colored-slip-export-area" class="rounded-xl border-2 ${
+            isPaid ? 'border-emerald-300 bg-gradient-to-b from-emerald-50/90 to-white' : 'border-amber-300 bg-gradient-to-b from-amber-50/90 to-white'
+          } p-4 space-y-3">
+            <div class="slip-colored-banner rounded-lg px-3.5 py-2.5 flex items-center justify-between gap-2">
+              <div>
+                <div class="text-xs font-extrabold tracking-wide text-amber-300">MAJISA E-MITRA • माजीसा ई-मित्र</div>
+                <div class="text-[11px] text-blue-100">Official Acknowledgment Slip / आधिकारिक आवेदन पावती</div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
+                isPaid ? 'bg-emerald-400 text-slate-950' : 'bg-amber-300 text-slate-950'
+              }">
+                ${isPaid ? '✓ PAID & VERIFIED' : escapeHtml(app.paymentMethod.toUpperCase())}
+              </span>
+            </div>
+
+            <div class="rounded-lg ${
+              isPaid
+                ? 'bg-emerald-100/80 border border-emerald-300 text-emerald-950'
+                : 'bg-amber-100/80 border border-amber-300 text-amber-950'
+            } px-3 py-2 text-xs font-bold flex items-center justify-between gap-2">
+              <span>
+                ${
+                  isPaid
+                    ? '✅ भुगतान सत्यापित व रसीद तैयार / Payment Verified'
+                    : '🧾 पावती रसीद तैयार / Slip Generated (' + escapeHtml(app.paymentMethod) + ')'
+                }
+              </span>
+              <span class="font-mono text-[11px]">${escapeHtml(app.id)}</span>
+            </div>
+
+            <div class="divide-y divide-slate-200/80 rounded-lg bg-white/95 border border-slate-200/80 px-3 text-xs sm:text-sm">
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Application ID / आईडी:</span>
+                <span class="font-mono font-extrabold text-civic-900 text-right">${escapeHtml(app.id)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Date &amp; Time / दिनांक:</span>
+                <span class="text-xs font-semibold text-slate-800 text-right">${escapeHtml(app.createdAt)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Customer / ग्राहक नाम:</span>
+                <span class="font-bold text-slate-900 text-right">${escapeHtml(app.customerName)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Mobile / मोबाइल:</span>
+                <span class="font-mono font-semibold text-slate-800 text-right">${escapeHtml(app.mobile)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Service / सेवा:</span>
+                <span class="font-bold text-civic-800 text-right">${escapeHtml(app.serviceName)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Doc / Ref No. / दस्तावेज़:</span>
+                <span class="font-mono text-xs font-semibold text-slate-800 text-right">${escapeHtml(app.idDoc)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2 bg-emerald-50/70 -mx-3 px-3">
+                <span class="text-emerald-900 font-bold">Fee / कुल शुल्क:</span>
+                <span class="font-extrabold text-emerald-700 text-sm sm:text-base text-right">₹${Number(app.fee || 0)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Payment Mode / माध्यम:</span>
+                <span class="font-bold text-slate-900 text-right">${escapeHtml(app.paymentMethod)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Payment Status / स्थिति:</span>
+                <span class="font-extrabold ${isPaid ? 'text-emerald-700' : 'text-amber-700'} text-right">${escapeHtml(app.paymentVerification)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">UTR / Ref No. / संदर्भ:</span>
+                <span class="font-mono text-xs font-semibold text-slate-800 text-right">${escapeHtml(app.txnRef)}</span>
+              </div>
+              <div class="py-1.5 flex justify-between gap-2">
+                <span class="text-slate-500 font-medium">Work Status / कार्य स्थिति:</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 text-right">${escapeHtml(app.status)}</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-600 flex flex-wrap items-center justify-between gap-1 pt-0.5">
+              <span>Majisa WhatsApp: <strong class="font-mono text-civic-900">${escapeHtml(centerWa)}</strong></span>
+              <span>धन्यवाद • Thank You</span>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-100 space-y-2 no-print">
+            <div class="text-xs font-bold text-slate-800 flex items-center justify-between">
+              <span>💬 WhatsApp Slip / व्हाट्सएप रसीद</span>
+              <span class="font-mono text-[11px] text-emerald-700">Majisa WA: ${escapeHtml(centerWa)}</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a
+                href="${escapeAttr(customerWaUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold text-center transition shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <span>📲</span>
+                <span>Customer WhatsApp (${escapeHtml(app.mobile)})</span>
+              </a>
+              <a
+                href="${escapeAttr(centerWaUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3 py-2.5 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs font-bold text-center transition shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <span>💬</span>
+                <span>Majisa WhatsApp (${escapeHtml(centerWa)})</span>
+              </a>
+            </div>
+            <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-snug">
+              Note: If your browser blocks automatic pop-ups, tap the WhatsApp button above to open WhatsApp with the pre-filled slip message. (यदि ब्राउज़र पॉप-अप ब्लॉक करे, तो ऊपर WhatsApp बटन दबाएं।)
+            </p>
+          </div>
+        `;
+      }
+
+      function openSlipConfirmationModal(app) {
+        const modal = document.getElementById('slip-confirmation-modal');
+        const body = document.getElementById('slip-confirmation-modal-body');
+        if (!modal || !body || !app) return;
+
+        const centerWa = appSettings?.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+        const waMsg = buildWhatsAppSlipMessage(app);
+        const customerWaUrl = getWhatsAppShareUrl(app.mobile, waMsg);
+        const centerWaUrl = getWhatsAppShareUrl(centerWa, waMsg);
+        const isPaid = app.paymentVerification === 'Paid & Verified';
+
+        body.innerHTML = `
+          <div class="rounded-xl border ${
+            isPaid ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-amber-50 border-amber-200 text-amber-950'
+          } p-3.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2">
+            <span>
+              ${
+                isPaid
+                  ? '✅ Payment Recorded & Colored PDF Slip Ready / भुगतान दर्ज व रंगीन PDF तैयार'
+                  : '🧾 Slip & Colored PDF Ready / पावती रसीद व रंगीन PDF तैयार (' + escapeHtml(app.paymentMethod) + ')'
+              }
+            </span>
+            <span class="font-mono">${escapeHtml(app.id)}</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs">
+            <div><span class="text-slate-500">Customer / ग्राहक:</span> <strong class="text-slate-900">${escapeHtml(app.customerName)}</strong></div>
+            <div><span class="text-slate-500">Mobile / मोबाइल:</span> <strong class="font-mono text-slate-900">${escapeHtml(app.mobile)}</strong></div>
+            <div class="sm:col-span-2"><span class="text-slate-500">Service / सेवा:</span> <strong class="text-civic-900">${escapeHtml(app.serviceName)}</strong></div>
+            <div><span class="text-slate-500">Fee / शुल्क:</span> <strong class="text-emerald-700 text-sm">₹${Number(app.fee || 0)}</strong></div>
+            <div><span class="text-slate-500">Mode / माध्यम:</span> <strong class="text-slate-900">${escapeHtml(app.paymentMethod)}</strong></div>
+            <div><span class="text-slate-500">UTR / Ref:</span> <strong class="font-mono text-slate-800">${escapeHtml(app.txnRef || '-')}</strong></div>
+            <div><span class="text-slate-500">Status / स्थिति:</span> <strong class="text-amber-800">${escapeHtml(app.status)}</strong></div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-slate-800">
+              💬 Send WhatsApp Slip / व्हाट्सएप पर रसीद भेजें (Majisa WA: <span class="font-mono text-emerald-700">${escapeHtml(centerWa)}</span>)
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <a
+                href="${escapeAttr(customerWaUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold text-center transition shadow-xs"
+              >
+                📲 Customer WhatsApp (${escapeHtml(app.mobile)})
+              </a>
+              <a
+                href="${escapeAttr(centerWaUrl)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3.5 py-2.5 rounded-xl bg-civic-900 hover:bg-civic-800 text-white text-xs font-bold text-center transition shadow-xs"
+              >
+                💬 Majisa WhatsApp (${escapeHtml(centerWa)})
+              </a>
+            </div>
+            <p class="text-[11px] text-slate-600 bg-slate-100 rounded-lg p-2.5 leading-snug">
+              Colored PDF downloads automatically on submit. If your browser blocks automatic WhatsApp pop-ups, click either WhatsApp button above. (यदि ब्राउज़र पॉप-अप ब्लॉक करे, तो ऊपर WhatsApp बटन दबाएं।)
+            </p>
+          </div>
+        `;
+
+        modal.classList.remove('hidden');
+      }
+
+      function closeSlipConfirmationModal() {
+        const modal = document.getElementById('slip-confirmation-modal');
+        if (modal) modal.classList.add('hidden');
+      }
+
+      async function downloadReceiptPdf(options = {}) {
+        const silentAuto = Boolean(options && options.silentAuto);
+        const app = latestReceiptApp || getApplications()[0];
+        if (!app) {
+          showToast('No Acknowledgment Slip available to download yet. (पहले आवेदन रसीद बनाएं)', 'info');
+          return;
+        }
+        renderReceipt(app);
+        const slipEl = document.getElementById('colored-slip-export-area') || document.getElementById('customer-receipt-card');
+        const jsPdfLib = window.jspdf && window.jspdf.jsPDF ? window.jspdf.jsPDF : null;
+
+        if (typeof html2canvas === 'function' && jsPdfLib && slipEl) {
+          try {
+            if (!silentAuto) {
+              showToast('Generating colored PDF slip... (रंगीन PDF रसीद बन रही है)', 'info');
+            }
+            const canvas = await html2canvas(slipEl, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#ffffff'
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPdfLib({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: 'a4'
+            });
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            const usableWidth = pageWidth - margin * 2;
+            const imgHeight = (canvas.height * usableWidth) / canvas.width;
+            const finalWidth = imgHeight > pageHeight - margin * 2 ? usableWidth * ((pageHeight - margin * 2) / imgHeight) : usableWidth;
+            const finalHeight = imgHeight > pageHeight - margin * 2 ? pageHeight - margin * 2 : imgHeight;
+            const xOffset = (pageWidth - finalWidth) / 2;
+
+            pdf.addImage(imgData, 'PNG', xOffset, margin, finalWidth, finalHeight);
+            pdf.save(`${app.id}-MAJISA-E-MITRA-Slip.pdf`);
+            if (!silentAuto) {
+              showToast(`Colored PDF downloaded: ${app.id}-MAJISA-E-MITRA-Slip.pdf`, 'success');
+            }
+            return;
+          } catch (err) {
+            console.warn('html2canvas/jsPDF capture failed, using fallback:', err);
+          }
+        }
+
+        // Offline / CDN-blocked fallback: generate a styled, color-coded printable HTML document
+        const centerWa = appSettings?.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+        const fallbackHtml = `<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <title>${escapeHtml(app.id)} — MAJISA E-MITRA Slip</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f1f5f9; padding: 24px; color: #0f172a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card { max-width: 620px; margin: 0 auto; background: #ffffff; border: 2px solid #0f294a; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 24px rgba(15,41,74,0.12); }
+    .hdr { background: linear-gradient(135deg, #0f294a, #1e40af, #c2410c); color: #ffffff; padding: 18px 22px; }
+    .hdr h1 { margin: 0; font-size: 20px; }
+    .hdr p { margin: 4px 0 0; font-size: 12px; color: #fde68a; }
+    .body { padding: 20px 22px; }
+    .badge { display: inline-block; background: #dcfce7; color: #166534; border: 1px solid #86efac; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: bold; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; }
+    td.lbl { color: #475569; font-weight: 600; width: 42%; }
+    td.val { color: #0f172a; font-weight: 700; text-align: right; }
+    .amt-row td { background: #ecfdf5; color: #047857; font-size: 15px; }
+    .ftr { background: #eff6ff; color: #1e3a8a; padding: 12px 22px; font-size: 12px; font-weight: 600; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="hdr">
+      <h1>MAJISA E-MITRA | माजीसा ई-मित्र</h1>
+      <p>Acknowledgment Slip / आवेदन पावती रसीद • WhatsApp: ${escapeHtml(centerWa)}</p>
+    </div>
+    <div class="body">
+      <div class="badge">${escapeHtml(app.paymentVerification)} • ${escapeHtml(app.paymentMethod)}</div>
+      <table>
+        <tr><td class="lbl">Application ID</td><td class="val">${escapeHtml(app.id)}</td></tr>
+        <tr><td class="lbl">Date &amp; Time</td><td class="val">${escapeHtml(app.createdAt)}</td></tr>
+        <tr><td class="lbl">Customer Name / ग्राहक नाम</td><td class="val">${escapeHtml(app.customerName)}</td></tr>
+        <tr><td class="lbl">Mobile / मोबाइल</td><td class="val">${escapeHtml(app.mobile)}</td></tr>
+        <tr><td class="lbl">Service / सेवा</td><td class="val">${escapeHtml(app.serviceName)}</td></tr>
+        <tr><td class="lbl">Doc / Ref No.</td><td class="val">${escapeHtml(app.idDoc)}</td></tr>
+        <tr class="amt-row"><td class="lbl">Fee / कुल शुल्क</td><td class="val">₹${Number(app.fee || 0)}</td></tr>
+        <tr><td class="lbl">Payment Mode</td><td class="val">${escapeHtml(app.paymentMethod)}</td></tr>
+        <tr><td class="lbl">UTR / Ref No.</td><td class="val">${escapeHtml(app.txnRef || '-')}</td></tr>
+        <tr><td class="lbl">Work Status</td><td class="val">${escapeHtml(app.status)}</td></tr>
+      </table>
+    </div>
+    <div class="ftr">Majisa E-Mitra WhatsApp: ${escapeHtml(centerWa)} • Save as PDF / Print</div>
+  </div>
+</body>
+</html>`;
+
+        const blob = new Blob([fallbackHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${app.id}-MAJISA-E-MITRA-Slip.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        if (!silentAuto) {
+          showToast('PDF library unavailable offline — downloaded styled color slip (.html) as fallback.', 'info');
+        }
+      }
+
+      function renderStatusTracker() {
+        const q = (document.getElementById('track-query-input')?.value || '').trim().toLowerCase();
+        const box = document.getElementById('status-tracker-results');
+        if (!box) return;
+        if (!q) {
+          box.innerHTML = '';
+          return;
+        }
+        const matches = getApplications().filter(
+          (a) => a.id.toLowerCase().includes(q) || a.mobile.toLowerCase().includes(q) || a.customerName.toLowerCase().includes(q)
+        );
+        if (!matches.length) {
+          box.innerHTML = `<div class="text-slate-500 py-1">No matching application found.</div>`;
+          return;
+        }
+        box.innerHTML = matches
+          .slice(0, 4)
+          .map(
+            (m) => `
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between gap-2">
+                <div>
+                  <div class="font-mono font-bold text-civic-900">${escapeHtml(m.id)} • ${escapeHtml(m.customerName)}</div>
+                  <div class="text-[11px] text-slate-600">${escapeHtml(m.serviceName)} • ₹${Number(m.fee || 0)} (${escapeHtml(m.paymentVerification)})</div>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 shrink-0">${escapeHtml(m.status)}</span>
+              </div>
+            `
+          )
+          .join('');
+      }
+
+      /* ==================== ADMIN PORTAL LOGIC ==================== */
+      function renderAdminView() {
+        const loginBox = document.getElementById('admin-login-box');
+        const dash = document.getElementById('admin-dashboard');
+        if (isAdminAuthenticated) {
+          loginBox.classList.add('hidden');
+          dash.classList.remove('hidden');
+          renderAdminKpis();
+          renderAdminTable();
+          renderAdminSettingsForm();
+          renderAdminServicesPanel();
+        } else {
+          loginBox.classList.remove('hidden');
+          dash.classList.add('hidden');
+        }
+      }
+
+      function handleAdminLogin(event) {
+        event.preventDefault();
+        const user = document.getElementById('admin-username').value.trim().toLowerCase();
+        const pin = document.getElementById('admin-pin').value.trim();
+        if (user === 'admin' && pin === getAdminPin()) {
+          isAdminAuthenticated = true;
+          document.getElementById('admin-pin').value = '';
+          renderAdminView();
+          showToast('Admin unlocked! (एडमिन डैशबोर्ड खुला)', 'success');
+        } else {
+          showToast('Invalid Admin ID or PIN! Demo PIN is 1234.', 'error');
+        }
+      }
+
+      function handleAdminLogout() {
+        isAdminAuthenticated = false;
+        renderAdminView();
+        showToast('Admin portal locked.', 'info');
+      }
+
+      function openPinChangeModal() {
+        document.getElementById('current-pin-input').value = '';
+        document.getElementById('new-pin-input').value = '';
+        document.getElementById('pin-modal').classList.remove('hidden');
+      }
+
+      function closePinChangeModal() {
+        document.getElementById('pin-modal').classList.add('hidden');
+      }
+
+      function handlePinChange(event) {
+        event.preventDefault();
+        const curr = document.getElementById('current-pin-input').value.trim();
+        const next = document.getElementById('new-pin-input').value.trim();
+        if (curr !== getAdminPin()) {
+          showToast('Current PIN is incorrect.', 'error');
+          return;
+        }
+        localStorage.setItem(STORAGE_KEYS.ADMIN_PIN, next);
+        closePinChangeModal();
+        showToast('Admin PIN updated successfully!', 'success');
+      }
+
+      function toggleAdminSection(section) {
+        const settingsEl = document.getElementById('admin-settings-panel');
+        const servicesEl = document.getElementById('admin-services-panel');
+        if (section === 'settings') {
+          settingsEl.classList.toggle('hidden');
+          servicesEl.classList.add('hidden');
+        } else {
+          servicesEl.classList.toggle('hidden');
+          settingsEl.classList.add('hidden');
+        }
+      }
+
+      function renderAdminKpis() {
+        const apps = getApplications();
+        const totalApps = apps.length;
+        const paidCount = apps.filter((a) => a.paymentVerification === 'Paid & Verified').length;
+        const totalRevenue = apps
+          .filter((a) => a.paymentVerification === 'Paid & Verified')
+          .reduce((sum, a) => sum + Number(a.fee || 0), 0);
+        const pendingWork = apps.filter((a) => a.status === 'Pending' || a.status === 'In Process').length;
+
+        const cards = [
+          { label: 'Total Applications', value: totalApps, sub: 'कुल आवेदन', tone: 'text-civic-900' },
+          { label: 'Verified Paid', value: `${paidCount}/${totalApps}`, sub: 'सत्यापित भुगतान', tone: 'text-emerald-700' },
+          { label: 'Verified Collection', value: `₹${totalRevenue}`, sub: 'कुल शुल्क संग्रह', tone: 'text-saffron-600' },
+          { label: 'Active Queue', value: pendingWork, sub: 'लंबित / प्रक्रियाधीन', tone: 'text-amber-700' }
+        ];
+
+        document.getElementById('admin-kpi-grid').innerHTML = cards
+          .map(
+            (c) => `
+              <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
+                <div class="text-xs font-semibold text-slate-500">${escapeHtml(c.label)} • ${escapeHtml(c.sub)}</div>
+                <div class="text-2xl sm:text-3xl font-extrabold ${c.tone} mt-1">${escapeHtml(String(c.value))}</div>
+              </div>
+            `
+          )
+          .join('');
+      }
+
+      function renderAdminTable() {
+        const tbody = document.getElementById('admin-applications-tbody');
+        const q = (document.getElementById('admin-search-input')?.value || '').trim().toLowerCase();
+        const statusFilter = document.getElementById('admin-status-filter')?.value || 'ALL';
+
+        const rows = getApplications().filter((a) => {
+          const matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
+          const matchesQuery =
+            !q ||
+            a.id.toLowerCase().includes(q) ||
+            a.customerName.toLowerCase().includes(q) ||
+            a.mobile.toLowerCase().includes(q) ||
+            a.serviceName.toLowerCase().includes(q) ||
+            (a.txnRef || '').toLowerCase().includes(q);
+          return matchesStatus && matchesQuery;
+        });
+
+        if (!rows.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-500">No applications found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = rows
+          .map((a) => {
+            const isPaid = a.paymentVerification === 'Paid & Verified';
+            return `
+              <tr class="hover:bg-slate-50/80 transition">
+                <td class="py-3 px-3 align-top">
+                  <div class="font-mono font-bold text-civic-900">${escapeHtml(a.id)}</div>
+                  <div class="text-[11px] text-slate-500">${escapeHtml(a.createdAt)}</div>
+                </td>
+                <td class="py-3 px-3 align-top">
+                  <div class="font-bold text-slate-900">${escapeHtml(a.customerName)}</div>
+                  <div class="font-mono text-xs text-slate-600">${escapeHtml(a.mobile)}</div>
+                  <div class="text-[11px] text-slate-500">${escapeHtml(a.idDoc)}</div>
+                </td>
+                <td class="py-3 px-3 align-top">
+                  <div class="font-semibold text-slate-800">${escapeHtml(a.serviceName)}</div>
+                  <div class="text-xs font-bold text-emerald-700 mt-0.5">₹${Number(a.fee || 0)}</div>
+                </td>
+                <td class="py-3 px-3 align-top">
+                  <div class="text-xs font-semibold text-slate-800">${escapeHtml(a.paymentMethod)}</div>
+                  <div class="font-mono text-[11px] text-slate-500">${escapeHtml(a.txnRef || '-')}</div>
+                  <button
+                    type="button"
+                    onclick="togglePaymentVerification('${escapeJs(a.id)}')"
+                    class="mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold cursor-pointer transition ${
+                      isPaid
+                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                        : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
+                    }"
+                  >
+                    ${isPaid ? '✓ Paid & Verified' : '⏳ Payment Pending'}
+                  </button>
+                </td>
+                <td class="py-3 px-3 align-top">
+                  <select
+                    aria-label="Work status for ${escapeAttr(a.id)}"
+                    onchange="updateWorkStatus('${escapeJs(a.id)}', this.value)"
+                    class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold outline-none"
+                  >
+                    ${['Pending', 'In Process', 'Completed', 'Rejected']
+                      .map((st) => `<option value="${st}" ${a.status === st ? 'selected' : ''}>${st}</option>`)
+                      .join('')}
+                  </select>
+                </td>
+                <td class="py-3 px-3 align-top text-right">
+                  <div class="inline-flex flex-wrap justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onclick="openDetailModal('${escapeJs(a.id)}')"
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition cursor-pointer"
+                    >
+                      View
+                    </button>
+                    <button
+                      type="button"
+                      onclick="sendApplicationWhatsApp('${escapeJs(a.id)}')"
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition cursor-pointer"
+                    >
+                      WA Slip
+                    </button>
+                    <button
+                      type="button"
+                      onclick="deleteApplication('${escapeJs(a.id)}')"
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join('');
+      }
+
+      function togglePaymentVerification(appId) {
+        const apps = getApplications();
+        const idx = apps.findIndex((a) => a.id === appId);
+        if (idx === -1) return;
+        apps[idx].paymentVerification =
+          apps[idx].paymentVerification === 'Paid & Verified' ? 'Payment Pending' : 'Paid & Verified';
+        saveApplications(apps);
+        renderAdminKpis();
+        renderAdminTable();
+        if (latestReceiptApp && latestReceiptApp.id === appId) {
+          renderReceipt(apps[idx]);
+        }
+        showToast(`Updated payment status for ${appId}.`, 'success');
+      }
+
+      function updateWorkStatus(appId, nextStatus) {
+        const apps = getApplications();
+        const idx = apps.findIndex((a) => a.id === appId);
+        if (idx === -1) return;
+        apps[idx].status = nextStatus;
+        saveApplications(apps);
+        renderAdminKpis();
+        renderStatusTracker();
+        if (latestReceiptApp && latestReceiptApp.id === appId) {
+          renderReceipt(apps[idx]);
+        }
+        showToast(`${appId} status set to ${nextStatus}.`, 'info');
+      }
+
+      function openDetailModal(appId) {
+        const app = getApplications().find((a) => a.id === appId);
+        if (!app) return;
+        latestReceiptApp = app;
+        const body = document.getElementById('detail-modal-body');
+        body.innerHTML = `
+          <div class="grid grid-cols-2 gap-y-2">
+            <span class="text-slate-500">Application ID:</span><span class="font-mono font-bold text-right">${escapeHtml(app.id)}</span>
+            <span class="text-slate-500">Date &amp; Time:</span><span class="text-right">${escapeHtml(app.createdAt)}</span>
+            <span class="text-slate-500">Customer Name:</span><span class="font-bold text-right">${escapeHtml(app.customerName)}</span>
+            <span class="text-slate-500">Mobile:</span><span class="font-mono text-right">${escapeHtml(app.mobile)}</span>
+            <span class="text-slate-500">Service:</span><span class="font-semibold text-right">${escapeHtml(app.serviceName)}</span>
+            <span class="text-slate-500">ID / Doc Ref:</span><span class="font-mono text-right">${escapeHtml(app.idDoc)}</span>
+            <span class="text-slate-500">Fee:</span><span class="font-extrabold text-emerald-700 text-right">₹${Number(app.fee || 0)}</span>
+            <span class="text-slate-500">Payment Mode:</span><span class="text-right">${escapeHtml(app.paymentMethod)}</span>
+            <span class="text-slate-500">Payment Status:</span><span class="font-bold text-right">${escapeHtml(app.paymentVerification)}</span>
+            <span class="text-slate-500">UTR / Ref:</span><span class="font-mono text-right">${escapeHtml(app.txnRef || '-')}</span>
+            <span class="text-slate-500">Work Status:</span><span class="font-bold text-amber-700 text-right">${escapeHtml(app.status)}</span>
+          </div>
+          <div class="pt-2 border-t border-slate-100">
+            <div class="text-xs font-bold text-slate-500 mb-1">Notes / टिप्पणी</div>
+            <div class="rounded-xl bg-slate-50 p-3 text-xs text-slate-700">${escapeHtml(app.notes || '-')}</div>
+          </div>
+          <div class="pt-2 flex flex-wrap gap-2">
+            <button type="button" onclick="printAcknowledgmentSlip()" class="px-3 py-2 rounded-xl bg-civic-900 text-white text-xs font-bold cursor-pointer">🖨️ Print Slip</button>
+            <button type="button" onclick="downloadReceiptPdf()" class="px-3 py-2 rounded-xl bg-amber-400 text-slate-950 border border-amber-500 text-xs font-bold cursor-pointer">📄 Download PDF</button>
+            <button type="button" onclick="sendApplicationWhatsApp('${escapeJs(app.id)}')" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer">📲 WhatsApp Slip</button>
+          </div>
+        `;
+        document.getElementById('detail-modal').classList.remove('hidden');
+      }
+
+      function closeDetailModal() {
+        document.getElementById('detail-modal').classList.add('hidden');
+      }
+
+      function sendApplicationWhatsApp(appId) {
+        const app = getApplications().find((a) => a.id === appId);
+        if (!app) {
+          showToast('Application not found.', 'error');
+          return;
+        }
+        const msg = buildWhatsAppSlipMessage(app);
+        const url = getWhatsAppShareUrl(app.mobile, msg);
+        const win = window.open(url, '_blank', 'noopener,noreferrer');
+        if (!win || win.closed || typeof win.closed === 'undefined') {
+          openSlipConfirmationModal(app);
+          showToast('Pop-up blocked: Use WhatsApp buttons in the slip modal.', 'info');
+        }
+      }
+
+      function deleteApplication(appId) {
+        const next = getApplications().filter((a) => a.id !== appId);
+        saveApplications(next);
+        renderAdminKpis();
+        renderAdminTable();
+        renderStatusTracker();
+        showToast(`Deleted application ${appId}.`, 'info');
+      }
+
+      function renderAdminSettingsForm() {
+        document.getElementById('setting-upi-id').value = appSettings.upiId;
+        document.getElementById('setting-merchant-name').value = appSettings.merchantName;
+        document.getElementById('setting-whatsapp-number').value = appSettings.whatsappNumber || DEFAULT_SETTINGS.whatsappNumber;
+
+        const grid = document.getElementById('setting-service-fees-grid');
+        grid.innerHTML = allServices
+          .map(
+            (svc) => `
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                <label for="fee-input-${escapeAttr(svc.id)}" class="block text-[11px] font-bold text-slate-700 truncate">${escapeHtml(svc.nameEn)}</label>
+                <div class="flex items-center gap-1 mt-1">
+                  <span class="text-xs font-bold text-slate-500">₹</span>
+                  <input
+                    id="fee-input-${escapeAttr(svc.id)}"
+                    type="number"
+                    min="0"
+                    value="${Number(svc.fee || 0)}"
+                    class="w-full rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-mono font-bold outline-none"
+                  />
+                </div>
+              </div>
+            `
+          )
+          .join('');
+      }
+
+      function saveAdminSettings(event) {
+        event.preventDefault();
+        try {
+          const upiId = document.getElementById('setting-upi-id').value.trim();
+          const merchantName = document.getElementById('setting-merchant-name').value.trim();
+          const waDigits = document.getElementById('setting-whatsapp-number').value.replace(/\D/g, '');
+
+          if (!upiId || !upiId.includes('@')) {
+            showToast('Please enter a valid UPI ID (e.g. majisa@okicici).', 'error');
+            return;
+          }
+          if (!/^[0-9]{10}$/.test(waDigits)) {
+            showToast('Please enter a valid 10-digit WhatsApp number (e.g. 9784018715).', 'error');
+            return;
+          }
+
+          const nextFees = {};
+          allServices.forEach((svc) => {
+            const el = document.getElementById(`fee-input-${svc.id}`);
+            const val = el ? Number(el.value) : svc.fee;
+            nextFees[svc.id] = Number.isFinite(val) && val >= 0 ? val : svc.fee;
+          });
+
+          appSettings = {
+            upiId,
+            merchantName: merchantName || 'MAJISA E-MITRA',
+            whatsappNumber: waDigits,
+            fees: nextFees
+          };
+          saveSettingsToStorage(appSettings);
+          refreshServicesCatalog();
+          renderServiceCards();
+          populateServiceDropdown();
+          selectService(selectedServiceId);
+          if (latestReceiptApp) renderReceipt(latestReceiptApp);
+          showToast('UPI ID, WhatsApp No. & Service Fees saved!', 'success');
+        } catch (err) {
+          showToast('Error saving settings: ' + err.message, 'error');
+        }
+      }
+
+      function handleAddService(event) {
+        event.preventDefault();
+        const nameEn = document.getElementById('new-svc-name-en').value.trim();
+        const nameHi = document.getElementById('new-svc-name-hi').value.trim();
+        const fee = Number(document.getElementById('new-svc-fee').value);
+        if (!nameEn || !nameHi || !Number.isFinite(fee) || fee < 0) {
+          showToast('Please enter valid service name & fee.', 'error');
+          return;
+        }
+        const id = `custom-${Date.now()}`;
+        const customList = getCustomServices();
+        customList.push({
+          id,
+          category: 'Citizen & CSC',
+          nameEn,
+          nameHi,
+          fee,
+          docs: ['Aadhaar Card', 'Passport Photo', 'Mobile Number']
+        });
+        localStorage.setItem(STORAGE_KEYS.CUSTOM_SERVICES, JSON.stringify(customList));
+        appSettings.fees[id] = fee;
+        saveSettingsToStorage(appSettings);
+
+        document.getElementById('new-svc-name-en').value = '';
+        document.getElementById('new-svc-name-hi').value = '';
+        document.getElementById('new-svc-fee').value = '';
+
+        refreshServicesCatalog();
+        renderServiceCards();
+        populateServiceDropdown();
+        renderAdminSettingsForm();
+        renderAdminServicesPanel();
+        showToast('New service added!', 'success');
+      }
+
+      function renderAdminServicesPanel() {
+        const box = document.getElementById('admin-service-toggles');
+        if (!box) return;
+        box.innerHTML = allServices
+          .map(
+            (svc) => `
+              <label class="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs cursor-pointer">
+                <span class="font-semibold text-slate-800 truncate">${escapeHtml(svc.nameEn)}</span>
+                <input
+                  type="checkbox"
+                  ${svc.enabled ? 'checked' : ''}
+                  onchange="toggleServiceEnabled('${escapeJs(svc.id)}', this.checked)"
+                  class="rounded border-slate-300 text-civic-700 cursor-pointer"
+                />
+              </label>
+            `
+          )
+          .join('');
+      }
+
+      function toggleServiceEnabled(serviceId, enabled) {
+        const disabledSet = new Set(getDisabledServiceIds());
+        if (enabled) {
+          disabledSet.delete(serviceId);
+        } else {
+          disabledSet.add(serviceId);
+        }
+        localStorage.setItem(STORAGE_KEYS.DISABLED_SERVICES, JSON.stringify([...disabledSet]));
+        refreshServicesCatalog();
+        renderServiceCards();
+        populateServiceDropdown();
+        selectService(selectedServiceId);
+        showToast(`${enabled ? 'Enabled' : 'Disabled'} service.`, 'info');
+      }
+
+      function exportApplicationsCsv() {
+        const apps = getApplications();
+        if (!apps.length) {
+          showToast('No applications to export.', 'info');
+          return;
+        }
+        const headers = [
+          'Application ID',
+          'Created At',
+          'Customer Name',
+          'Mobile',
+          'Service',
+          'ID/Doc',
+          'Fee',
+          'Payment Method',
+          'Payment Status',
+          'UTR/Ref',
+          'Work Status',
+          'Notes'
+        ];
+        const csvLines = [
+          headers.join(','),
+          ...apps.map((a) =>
+            [
+              a.id,
+              a.createdAt,
+              a.customerName,
+              a.mobile,
+              a.serviceName,
+              a.idDoc,
+              a.fee,
+              a.paymentMethod,
+              a.paymentVerification,
+              a.txnRef,
+              a.status,
+              a.notes || ''
+            ]
+              .map((val) => `"${String(val ?? '').replace(/"/g, '""')}"`)
+              .join(',')
+          )
+        ];
+        const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `majisa-e-mitra-applications-${Date.now()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Exported CSV report!', 'success');
+      }
+
+      function resetDemoData() {
+        localStorage.setItem(STORAGE_KEYS.APPLICATIONS, JSON.stringify(DEMO_APPLICATIONS));
+        localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+        localStorage.removeItem(STORAGE_KEYS.CUSTOM_SERVICES);
+        localStorage.removeItem(STORAGE_KEYS.DISABLED_SERVICES);
+        localStorage.removeItem(STORAGE_KEYS.ADMIN_PIN);
+        appSettings = loadSettings();
+        selectedServiceId = 'pan-card';
+        refreshServicesCatalog();
+        renderCategoryFilters();
+        renderServiceCards();
+        populateServiceDropdown();
+        selectService(selectedServiceId);
+        renderAdminView();
+        renderStatusTracker();
+        showToast('Demo data and settings reset to default.', 'info');
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const palette = {
+          success: 'bg-emerald-700 text-white border-emerald-500',
+          error: 'bg-rose-700 text-white border-rose-500',
+          info: 'bg-civic-900 text-white border-civic-700'
+        };
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto rounded-xl border px-4 py-3 text-xs sm:text-sm font-semibold shadow-lg transition ${
+          palette[type] || palette.info
+        }`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.remove();
+        }, 4200);
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function escapeAttr(str) {
+        return escapeHtml(str);
+      }
+
+      function escapeJs(str) {
+        return String(str ?? '')
+          .replace(/\\/g, '\\\\')
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '\\"');
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        refreshServicesCatalog();
+        renderCategoryFilters();
+        renderServiceCards();
+        populateServiceDropdown();
+        selectService(selectedServiceId);
+        const savedMode = localStorage.getItem(STORAGE_KEYS.DISPLAY_MODE) || 'bilingual';
+        setDisplayMode(savedMode);
+      });
+    </script>
+  </body>
+</html>
